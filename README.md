@@ -62,7 +62,7 @@ Testing across longitudinal statutory enactments versus contemporaneous vernacul
 | **hazard** | **0.4215** | **0.20** | **0.3471** | Vernacular Drift | **High (Severe Drift: Sea Risk -> Toxic Waste)** |
 | **nice** | **0.4890** | **0.00** | **0.2555** | Vernacular Drift | **High (Epistemic Exactness -> Social Affect)** |
 
-![Legal Semantic Inertia Distribution](./output/download (2).png)
+![Legal Semantic Inertia Distribution](./output/statutory)
 
 > **Figure 1:** Semantic Inertia spectrum. Statutory markers maintain $\text{LSI} > 0.85$, exhibiting near-zero vector displacement and 100% neighborhood preservation, while vernacular terms experience drastic semantic drift.
 
