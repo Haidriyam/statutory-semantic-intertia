@@ -81,32 +81,3 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 pip install -r requirements.txt
-
-## 5. Visual Artifacts & Distribution Plot
-
-The pipeline generates high-resolution vector displacement charts directly in the repository root or `./output/`:
-
-* **Direct Asset URL:** [`https://raw.githubusercontent.com/Haidriyam/statutory-semantic-inertia/main/inertia_distribution.png`](https://raw.githubusercontent.com/Haidriyam/statutory-semantic-inertia/main/inertia_distribution.png)
-
-![Legal Semantic Inertia Distribution](https://raw.githubusercontent.com/Haidriyam/statutory-semantic-inertia/main/inertia_distribution.png)
-
-> **Figure 2:** Distribution of Legal Semantic Inertia ($\text{LSI}$). Blue bars denote statutory anchors ($\text{LSI} > 0.70$) characterized by invariant vector positions and persistent coordinate collocations. Red bars mark vernacular drift ($D > 0.35$), identifying tokens prone to severe anachronistic hallucinations in contemporary generative LLMs.
-
----
-
-## 6. Citation & Academic Contact
-
-If this implementation, theoretical framework, or mathematical alignment methodology contributes to your research, please cite this repository:
-
-```bibtex
-@software{sajjad_legal_inertia_2026,
-  author = {Muhammad Adeel Sajjad},
-  title = {Statutory Semantic Inertia: Measuring Diachronic Fossilization in Legal Corpora via Procrustes-Aligned Embeddings},
-  year = {2026},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{[https://github.com/Haidriyam/statutory-semantic-inertia](https://github.com/Haidriyam/statutory-semantic-inertia)}}
-}
-
-
-
