@@ -75,7 +75,15 @@ Testing across longitudinal statutory enactments versus contemporaneous vernacul
 git clone [https://github.com/Haidriyam/statutory-semantic-inertia.git](https://github.com/Haidriyam/statutory-semantic-inertia.git)
 cd statutory-semantic-inertia
 
+
+
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 pip install -r requirements.txt
+
+### Note on Image Paths:
+* The relative path `![Alt text](./inertia_distribution.png)` works directly on your repository homepage when viewing via GitHub.
+* The explicit raw URL `[https://raw.githubusercontent.com/Haidriyam/statutory-semantic-inertia/main/inertia_distribution.png](https://raw.githubusercontent.com/Haidriyam/statutory-semantic-inertia/main/inertia_distribution.png)` guarantees the image resolves across external platforms (like Zenodo metadata views, personal portfolio sites, or external Markdown viewers) once `inertia_distribution.png` is committed to your `main` branch.
+
+<FollowUp label="Want me to draft the cold outreach email to legal informatics professors citing this paper and repo?" query="Draft a concise cold outreach email to legal informatics and computational law faculty citing this new Zenodo preprint and repository."/>
