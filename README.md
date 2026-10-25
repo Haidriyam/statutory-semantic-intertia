@@ -3,8 +3,7 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Haidriyam/statutory-semantic-inertia/blob/main/notebooks/legal_inertia_demo.ipynb)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.legal--inertia-blue)](https://zenodo.org/)
-[![Field: Computational Law](https://img.shields.io/badge/Field-Computational%20Law%20%7C%20Legal%20Informatics-crimson.svg)]()
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23613023.svg)](https://doi.org/10.5281/zenodo.23613023)[![Field: Computational Law](https://img.shields.io/badge/Field-Computational%20Law%20%7C%20Legal%20Informatics-crimson.svg)]()
 [![Code Style: PEP8](https://img.shields.io/badge/code%20style-pep8-green.svg)](https://www.python.org/dev/peps/pep-0008/)
 
 An empirical NLP engine quantifying **semantic inertia** and **statutory fossilization** across longitudinal legal archives. By establishing an invariant metric space via Orthogonal Procrustes alignment, this repository measures how institutional authority halts natural linguistic drift—and provides a quantitative benchmark for diagnosing anachronistic hallucinations in modern legal Large Language Models (LLMs).
