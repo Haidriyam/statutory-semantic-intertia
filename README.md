@@ -1,82 +1,124 @@
-# Statutory Semantic Inertia: Measuring Diachronic Fossilization in Legal Corpora via Procrustes-Aligned Embeddings
+# Statutory Semantic Inertia: Measuring Diachronic Semantic Change in Legal Corpora
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Haidriyam/statutory-semantic-inertia/blob/main/notebooks/legal_inertia_demo.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Haidriyam/statutory-semantic-intertia/blob/main/notebooks/legal_inertia_demo.ipynb)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23613023.svg)](https://doi.org/10.5281/zenodo.23613023)[![Field: Computational Law](https://img.shields.io/badge/Field-Computational%20Law%20%7C%20Legal%20Informatics-crimson.svg)]()
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23613023.svg)](https://doi.org/10.5281/zenodo.23613023)
+[![Field: Computational Law](https://img.shields.io/badge/Field-Computational%20Law%20%7C%20Legal%20NLP-crimson.svg)]()
 [![Code Style: PEP8](https://img.shields.io/badge/code%20style-pep8-green.svg)](https://www.python.org/dev/peps/pep-0008/)
 
-An empirical NLP engine quantifying **semantic inertia** and **statutory fossilization** across longitudinal legal archives. By establishing an invariant metric space via Orthogonal Procrustes alignment, this repository measures how institutional authority halts natural linguistic drift—and provides a quantitative benchmark for diagnosing anachronistic hallucinations in modern legal Large Language Models (LLMs).
+A research implementation evaluating diachronic semantic change across temporal corpus partitions. By establishing an invariant coordinate space via Orthogonal Procrustes alignment, this repository provides reference tooling to measure lexical displacement ($D$), nearest-neighbor Jaccard stability ($J$), and frequency-calibrated stability metrics across historical and domain-specific corpora.
+
+> **Research Status:** The methodological foundations, split-half noise-floor calibrations, and deduplication controls accompanying this framework are evaluated in the preprint:  
+> *Sajjad, M. A., & Saleem, M. W. (2026). Measuring Statutory Semantic Inertia: A Noise-Calibrated Framework for Separating Legal Semantic Stability from Ordinary Semantic Drift.* Zenodo. [DOI: 10.5281/zenodo.23613023](https://doi.org/10.5281/zenodo.23613023)
 
 ---
 
 ## 1. Problem Statement: Precedent vs. Semantic Drift
 
-In natural vernacular discourse, lexical items continuously drift along cultural, technological, and pragmatic dimensions. In statutory law and judicial precedent, however, linguistic evolution represents a systemic vulnerability: legal certainty requires terms defined in 18th- or 19th-century statutes (e.g., *indenture*, *hereditament*, *malice aforethought*, *hereinabove*) to maintain invariant legal definitions across centuries.
+In natural vernacular discourse, lexical items continuously drift along cultural, technological, and pragmatic dimensions. In statutory law and judicial precedent, however, linguistic evolution introduces interpretive challenges: legal certainty often requires terms defined in historical statutes (*indenture*, *witnesseth*, *statute*, *hereinabove*) to preserve stable domain interpretations across extended temporal horizons.
 
-This dynamic creates two unresolved challenges in computational linguistics and legal informatics:
-1. **The Institutional Constraint Problem:** Computational linguistics extensively measures lexical *drift*, but lacks a formal mathematical framework for measuring **semantic inertia**—the resistance of vocabulary to drift under institutional pressure.
-2. **The LLM Misalignment Risk:** Contemporary foundation models (e.g., GPT-4, LLaMA) are trained predominantly on 21st-century web corpora. When evaluating historical statutes or contractual precedents, these models project contemporary colloquial semantic neighborhoods onto fossilized legal tokens, generating acute interpretive hallucinations.
+Evaluating diachronic change in legal text presents specific measurement bottlenecks:
+1. **The Representation & Noise Confound:** Diachronic word embeddings are sensitive to corpus size, word frequency, and stochastic training variance. Rare legal tokens often exhibit high raw displacement simply due to estimation noise.
+2. **Textual Inheritance:** Legislative codification, amendment, and formulaic boilerplate preserve identical syntactic strings across decades, creating an artificial appearance of semantic stability that requires rigorous deduplication controls.
+3. **Foundation Model Misalignment:** Contemporary autoregressive language models (LLMs) trained primarily on 21st-century web crawls risk projecting contemporary colloquial topologies onto historical legal tokens when parsing archival jurisprudence.
 
 ---
 
 ## 2. Mathematical Formulation
 
-Let $W^{(t_1)}$ and $W^{(t_2)} \in \mathbb{R}^{|V| \times d}$ be historical embedding matrices over shared intersection vocabulary $V$ with dimension $d$.
+Let $W^{(t_1)}$ and $W^{(t_2)} \in \mathbb{R}^{|V| \times d}$ denote row-normalized embedding matrices for periods $t_1$ and $t_2$ over a shared intersection vocabulary $V$ with latent dimension $d$.
 
 ### 2.1 Coordinate Space Alignment (Orthogonal Procrustes)
-To eliminate random rotational divergence introduced during independent neural network optimization while preserving internal metric geometry, we solve for orthogonal matrix $Q \in \mathbb{R}^{d \times d}$ where $Q^T Q = I$:
+To eliminate arbitrary orthogonal rotation divergence introduced during independent neural network training while preserving internal metric geometry, we solve for the orthogonal transformation matrix $Q \in \mathbb{R}^{d \times d}$ over anchor vocabulary $A \subset V$:
 
-$$Q = \arg\min_{\Omega^T \Omega = I} \| W^{(t_1)} - W^{(t_2)} \Omega \|_F$$
+$$Q = \arg\min_{\Omega^T \Omega = I} \| W_A^{(t_1)} - W_A^{(t_2)} \Omega \|_F$$
 
-Using Singular Value Decomposition (SVD):
-$$M = (W^{(t_2)})^T W^{(t_1)} = U \Sigma V^T \implies Q = U V^T$$
+Using Singular Value Decomposition (SVD) on the normalized cross-covariance matrix:
+$$M = (W_A^{(t_2)})^T W_A^{(t_1)} = U \Sigma V^T \implies Q = U V^T$$
 
-### 2.2 Legal Semantic Inertia Index ($\text{LSI}$)
-For each token $w \in V$, we define its **Legal Semantic Inertia Index**:
+### 2.2 Displacement and Neighborhood Stability
+For each token $w \in V$, we compute:
 
-$$\text{LSI}(w) = \Big(1 - D(w)\Big) \times \left(\frac{1 + J(N_{t_1}(w), N_{t_2}(w))}{2}\right)$$
+1. **Cosine Displacement ($D$):**
+   $$D(w) = 1 - \frac{\vec{v}_{t_1}(w) \cdot (Q^T \vec{v}_{t_2}(w))}{\|\vec{v}_{t_1}(w)\| \|Q^T \vec{v}_{t_2}(w)\|}, \quad D(w) \in [0, 2]$$
 
-Where:
-* $D(w) = 1 - \frac{\vec{v}_{t_1}(w) \cdot (Q^T \vec{v}_{t_2}(w))}{\|\vec{v}_{t_1}(w)\| \|Q^T \vec{v}_{t_2}(w)\|}$ is the cosine displacement.
-* $J(N_{t_1}, N_{t_2}) = \frac{|N_{t_1}(w) \cap N_{t_2}(w)|}{|N_{t_1}(w) \cup N_{t_2}(w)|}$ is the Jaccard similarity between the top-$k$ nearest semantic neighbors across epochs.
+2. **Top-$k$ Nearest Neighbor Jaccard Stability ($J$):**
+   $$J(w) = \frac{|N_{t_1}^k(w) \cap N_{t_2}^k(w)|}{|N_{t_1}^k(w) \cup N_{t_2}^k(w)|}, \quad J(w) \in [0, 1]$$
 
-$$\begin{cases}
-\text{LSI}(w) \to 1.0 & \text{Absolute Statutory Anchor (Complete Fossilization)} \\
-\text{LSI}(w) < 0.50 & \text{Vernacular Drift (High LLM Anachronism Vulnerability)}
-\end{cases}$$
+3. **Exploratory Composite Index ($\text{LSI}$):**
+   $$\text{LSI}(w) = \Big(1 - D(w)\Big) \times \left(\frac{1 + J(w)}{2}\right)$$
 
----
-
-## 3. Empirical Results
-
-Testing across longitudinal statutory enactments versus contemporaneous vernacular text reveals a structural bifurcation in semantic velocity:
-
-| Lexical Token | Cosine Displacement ($D$) | Neighbor Stability ($J$) | $\text{LSI}$ Index | Classification | Downstream LLM Risk |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **hereinabove** | **0.0142** | **1.00** | **0.9858** | Statutory Anchor | Low (Stable Collocation) |
-| **indenture** | **0.0210** | **1.00** | **0.9790** | Statutory Anchor | Medium (Contextual Misreading) |
-| **witnesseth** | **0.0195** | **1.00** | **0.9805** | Statutory Anchor | Low (Syntactic Rigidity) |
-| **statute** | 0.0812 | 0.80 | 0.8269 | Institutional Token | Low |
-| **hazard** | **0.4215** | **0.20** | **0.3471** | Vernacular Drift | **High (Severe Drift: Sea Risk -> Toxic Waste)** |
-| **nice** | **0.4890** | **0.00** | **0.2555** | Vernacular Drift | **High (Epistemic Exactness -> Social Affect)** |
-
-![Legal Semantic Inertia Distribution](./output/statutory.png)
-
-> **Figure 1:** Semantic Inertia spectrum. Statutory markers maintain $\text{LSI} > 0.85$, exhibiting near-zero vector displacement and 100% neighborhood preservation, while vernacular terms experience drastic semantic drift.
+*Note:* In our synthetic benchmark audit (DOI: 10.5281/zenodo.23613023), raw displacement $D$ after frequency calibration was shown to outperform composite indices. The composite is retained here solely as an exploratory reference metric.
 
 ---
 
-## 4. Pipeline Execution & Colab Demo
+## 3. Reference Demonstration Results
+
+Executing the reference engine (`src/legal_inertia_engine.py`) over synthetic controlled text slices demonstrates the expected separation between persistent structural statutory tokens and shifted vernacular tokens:
+
+| Lexical Token | Cosine Displacement ($D$) | Neighbor Jaccard ($J$, $k=3$) | Exploratory $\text{LSI}$ | Behavior Profile |
+| :--- | :--- | :--- | :--- | :--- |
+| **indenture** | **0.010** | **1.00** | **0.990** | Structural Anchor (Persistent Context) |
+| **hereinabove** | **0.012** | **1.00** | **0.988** | Structural Anchor (Persistent Context) |
+| **statute** | **0.013** | **1.00** | **0.987** | Institutional Token |
+| **witnesseth** | **0.014** | **1.00** | **0.986** | Structural Formula |
+| **hazard** | **0.977** | **0.00** | **0.012** | Contextual Drift (Maritime $\to$ Toxic Waste) |
+| **nice** | **1.209** | **0.00** | **-0.105** | Contextual Drift (Subtle $\to$ Social Pleasantness) |
+
+---
+
+## 4. Visual Artifact
+
+The pipeline exports high-resolution vector displacement charts directly to `./output/`:
+
+![Diachronic Lexical Displacement](./output/semantic_change_distribution.png)
+
+> **Figure 1:** Observed diachronic displacement $D(w)$ across test tokens. Teal bars represent statutory terms retaining near-invariant coordinate positions ($D \le 0.014$). Crimson bars mark tokens subjected to intentional contextual shift ($D \ge 0.977$), illustrating the sensitivity of SVD Procrustes alignment on calibrated anchors.
+
+---
+
+## 5. Pipeline Execution & Quickstart
 
 ### Installation
 ```bash
-git clone [https://github.com/Haidriyam/statutory-semantic-inertia.git](https://github.com/Haidriyam/statutory-semantic-inertia.git)
-cd statutory-semantic-inertia
+git clone https://github.com/Haidriyam/statutory-semantic-intertia.git
+cd statutory-semantic-intertia
 
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
+# Install dependencies
 pip install -r requirements.txt
+```
+
+### Run Demonstration Engine
+```bash
+python src/legal_inertia_engine.py --output output/semantic_change_distribution.png --k 3
+```
+
+To run the interactive notebook demo in Google Colab, click the **Open In Colab** badge above or open `notebooks/legal_inertia_demo.ipynb`.
+
+---
+
+## 6. Citation
+
+If this implementation or the calibration methodology contributes to your research, please cite the preprint:
+
+```bibtex
+@article{sajjad2026statutory,
+  title={Measuring Statutory Semantic Inertia: A Noise-Calibrated Framework for Separating Legal Semantic Stability from Ordinary Semantic Drift},
+  author={Sajjad, Muhammad Adeel and Saleem, Muhammad Waleed},
+  journal={Zenodo Preprint},
+  year={2026},
+  doi={10.5281/zenodo.23613023},
+  url={https://doi.org/10.5281/zenodo.23613023}
+}
+```
+
+* **Lead Author:** Muhammad Adeel Sajjad  
+* **Background:** B.S. Electrical Engineering | Systems & Infrastructure Engineer  
+* **Research Focus:** Computational Law, Diachronic Semantics, Foundation Model Calibration  
+* **GitHub:** [@Haidriyam](https://github.com/Haidriyam)  
+* **Email:** eng.adeelhaider@gmail.com
