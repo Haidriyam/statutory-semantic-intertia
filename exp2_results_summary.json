@@ -1,0 +1,84 @@
+{
+ "S1": {
+  "mean_dED": 0.10411053689471148,
+  "mean_dRawD": 0.1040372239067897,
+  "mean_realised": 0.12852858505283377,
+  "frac_excl0_rawD": 1.0,
+  "frac_excl0_ED": 1.0,
+  "frac_excl0_EJ": 1.0,
+  "frac_excl0_ED_domain": 1.0,
+  "mean_dED_domain": 0.10391987438888908,
+  "frac_correct_sign_ED": 1.0
+ },
+ "S2": {
+  "mean_dED": 0.0006195703593924371,
+  "mean_dRawD": 0.0005000254711740094,
+  "mean_realised": -0.000354012024097569,
+  "frac_excl0_rawD": 0.09,
+  "frac_excl0_ED": 0.07,
+  "frac_excl0_EJ": 0.43,
+  "frac_excl0_ED_domain": 0.1,
+  "mean_dED_domain": 0.0002464938658091406,
+  "frac_correct_sign_ED": 0.05
+ },
+ "S3full": {
+  "mean_dED": 0.06361594528781395,
+  "mean_dRawD": 0.06361321871534394,
+  "mean_realised": -0.0013127677765360176,
+  "frac_excl0_rawD": 1.0,
+  "frac_excl0_ED": 1.0,
+  "frac_excl0_EJ": 1.0,
+  "frac_excl0_ED_domain": 1.0,
+  "mean_dED_domain": 0.06365045952289815,
+  "frac_correct_sign_ED": 1.0
+ },
+ "S3dedup": {
+  "mean_dED": 0.0005640283662939786,
+  "mean_dRawD": 0.0004395902607569777,
+  "mean_realised": -0.0002706893828847229,
+  "frac_excl0_rawD": 0.11,
+  "frac_excl0_ED": 0.09,
+  "frac_excl0_EJ": 0.44,
+  "frac_excl0_ED_domain": 0.11,
+  "mean_dED_domain": 0.00024971518340995917,
+  "frac_correct_sign_ED": 0.05
+ },
+ "S4": {
+  "mean_dED": 0.003612483184657332,
+  "mean_dRawD": -0.00866033544778248,
+  "mean_realised": 0.007846855436314068,
+  "frac_excl0_rawD": 0.1,
+  "frac_excl0_ED": 0.05,
+  "frac_excl0_EJ": 0.46,
+  "frac_excl0_ED_domain": 0.05,
+  "mean_dED_domain": 0.0033506633734783865,
+  "frac_correct_sign_ED": 0.05
+ },
+ "tracking_S2": {
+  "sd_realised": 0.005131765213171928,
+  "rawD": {
+   "r": 0.4463522900015595,
+   "slope": 0.9384790003086095,
+   "resid_sd": 0.009704472362830351,
+   "mean_boot_se": 0.009412001283268145,
+   "ci_contains_pred": 0.95,
+   "frac_excl_pred": 0.05
+  },
+  "ED": {
+   "r": 0.40134181658355483,
+   "slope": 0.8459843181401083,
+   "resid_sd": 0.009958197632458728,
+   "mean_boot_se": 0.009432952615326708,
+   "ci_contains_pred": 0.95,
+   "frac_excl_pred": 0.05
+  },
+  "EJ": {
+   "r": 0.4639999207810418,
+   "slope": 1.7307084881860884,
+   "resid_sd": 0.01704238251228081,
+   "mean_boot_se": 0.007574250550102511,
+   "ci_contains_pred": 0.62,
+   "frac_excl_pred": 0.38
+  }
+ }
+}

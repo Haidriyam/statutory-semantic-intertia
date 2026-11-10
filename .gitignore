@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+data/semeval/corpus1/
+data/semeval/corpus2/
+*.tar.gz
+*.gz
+*.bak
+semeval_repeated_backup.json
