@@ -157,16 +157,37 @@ def train_triplet(s1, s2, vocab, n, dim, window, rng):
     return [embed_real(x, V, dim, window, rng) for x in (A, P2, B)]
 
 
-def score_triplet(models, targets, anchors, cand, k):
+def score_triplet(models, targets, anchors, cand, k, pool=None):
     m1, m2, mn = models
     D = sim.displacement(m1, m2, anchors)[targets]
-    D0 = sim.displacement(m1, mn, anchors)[targets]
     J = sim.jaccard(m1, m2, targets, cand, k)
-    J0 = sim.jaccard(m1, mn, targets, cand, k)
-    band = sim.deciles(m1.freq[targets])
-    ED = D - sim.band_mean(D0, band)[band]
-    EJ = sim.band_mean(J0, band)[band] - J
-    return {"D": D, "J": J, "ED": ED, "EJ": EJ, "D0": D0}
+
+    if pool is None:
+        # Standard deciles calculated across target words only
+        D0 = sim.displacement(m1, mn, anchors)[targets]
+        J0 = sim.jaccard(m1, mn, targets, cand, k)
+        band = sim.deciles(m1.freq[targets])
+        ED = D - sim.band_mean(D0, band)[band]
+        EJ = sim.band_mean(J0, band)[band] - J
+        return {"D": D, "J": J, "ED": ED, "EJ": EJ, "D0": D0}
+    else:
+        # Pooled deciles calculated across the background reference pool
+        D0_pool = sim.displacement(m1, mn, anchors)[pool]
+        J0_pool = sim.jaccard(m1, mn, pool, cand, k)
+        pool_freq = m1.freq[pool]
+        pool_band = sim.deciles(pool_freq)
+        mean_D0_by_band = sim.band_mean(D0_pool, pool_band)
+        mean_J0_by_band = sim.band_mean(J0_pool, pool_band)
+
+        # Map targets into reference pool decile thresholds
+        target_freq = m1.freq[targets]
+        cuts = np.percentile(pool_freq, np.linspace(10, 90, 9))
+        target_band = np.clip(np.searchsorted(cuts, target_freq), 0, 9)
+
+        ED = D - mean_D0_by_band[target_band]
+        EJ = mean_J0_by_band[target_band] - J
+        D0_target = sim.displacement(m1, mn, anchors)[targets]
+        return {"D": D, "J": J, "ED": ED, "EJ": EJ, "D0": D0_target}
 
 
 def pick_sets(all_models, targets_pool, n_anchor, n_cand, exclude):
@@ -215,12 +236,16 @@ def cmd_semeval(a):
         ok = np.all([m.freq[tid] >= sim.MINCOUNT for m in models], axis=0)
         print(f"Targets passing frequency filter: {int(ok.sum())}/{len(tid)}", flush=True)
         anchors, cand = pick_sets(models, tid, a.anchors, a.cand, exclude=tid)
-        sc = score_triplet(models, tid, anchors, cand, a.k)
+        
+        # Select background pool based on CLI argument
+        ref_pool = cand if getattr(a, "null_mode", "targets") == "pool" else None
+        sc = score_triplet(models, tid, anchors, cand, a.k, pool=ref_pool)
+
         for key, vals in (("D", sc["D"]), ("ED", sc["ED"]), ("negJ", -sc["J"]), ("EJ", sc["EJ"])):
             rhos[key].append(float(spearmanr(vals[ok], g[ok])[0]))
         print(f"run {r}: " + " ".join(f"{k}={v[-1]:.3f}" for k, v in rhos.items()), flush=True)
     res["spearman_vs_gold"] = {k: [float(np.mean(v)), float(np.std(v, ddof=1)) if len(v) > 1 else 0.0]
-                               for k, v in rhos.items()}
+                                for k, v in rhos.items()}
     json.dump(res, open(a.out, "w"), indent=1)
     print(json.dumps(res["spearman_vs_gold"], indent=1))
 
@@ -231,7 +256,7 @@ def cmd_paired(a):
     arms = {"gen": (read_sentences(expand(a.gen_p1)), read_sentences(expand(a.gen_p2))),
             "stat": (read_sentences(expand(a.stat_p1)), read_sentences(expand(a.stat_p2)))}
     if a.dedup_stat:
-        arms["stat"] = tuple(dedup(s) for s in arms["stat"])      # compare with/without
+        arms["stat"] = tuple(dedup(s) for s in arms["stat"])
     vocab = build_vocab([s for pair in arms.values() for s in pair], a.vocab, a.min_count)
     n = a.budget or min(min(n_tokens(p1) // 2, n_tokens(p2)) for p1, p2 in arms.values())
     print(f"vocab={len(vocab)} budget n={n:,} tokens per model", flush=True)
@@ -287,7 +312,10 @@ def main():
         q.add_argument("--seed", type=int, default=0)
         q.add_argument("--out", default="result.json")
     q = sub.add_parser("semeval"); common(q)
-    q.add_argument("--root", required=True); q.add_argument("--dedup", action="store_true")
+    q.add_argument("--root", required=True)
+    q.add_argument("--dedup", action="store_true")
+    q.add_argument("--null-mode", choices=["targets", "pool"], default="targets",
+                   help="Background reference pool for decile null calibration (default: targets)")
     q.set_defaults(f=cmd_semeval)
     q = sub.add_parser("paired"); common(q)
     for n in ("gen-p1", "gen-p2", "stat-p1", "stat-p2"):
